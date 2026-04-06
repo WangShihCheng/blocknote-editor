@@ -1,0 +1,55 @@
+export const zhTW = {
+  slash_menu: {
+    paragraph: { title: '段落', subtext: '一般文字', aliases: ['p', '文字'] },
+    heading_1: { title: '標題 1', subtext: '最大標題', aliases: ['h1', '標題'] },
+    heading_2: { title: '標題 2', subtext: '中標題', aliases: ['h2'] },
+    heading_3: { title: '標題 3', subtext: '小標題', aliases: ['h3'] },
+    bulleted_list: { title: '無序清單', subtext: '項目符號列表', aliases: ['ul', '清單'] },
+    numbered_list: { title: '有序清單', subtext: '編號列表', aliases: ['ol'] },
+    check_list: { title: '待辦清單', subtext: '可勾選項目', aliases: ['todo', '待辦'] },
+    code_block: { title: '程式碼', subtext: '程式碼區塊', aliases: ['code'] },
+    quote: { title: '引用', subtext: '引用區塊', aliases: ['quote'] },
+    image: { title: '圖片', subtext: '插入圖片', aliases: ['img'] },
+    table: { title: '表格', subtext: '插入表格', aliases: ['table'] },
+  },
+  placeholders: {
+    default: '輸入「/」插入內容…',
+    heading: '標題',
+  },
+  file_blocks: {
+    image: { add_button_text: '新增圖片' },
+  },
+  side_menu: {
+    add_block_label: '新增區塊',
+    drag_handle_label: '開啟區塊選單',
+  },
+  drag_handle: {
+    delete_menuitem: '刪除',
+    colors_menuitem: '顏色',
+  },
+  formatting_toolbar: {
+    bold: { tooltip: '粗體', secondary_tooltip: 'Ctrl+B' },
+    italic: { tooltip: '斜體', secondary_tooltip: 'Ctrl+I' },
+    underline: { tooltip: '底線', secondary_tooltip: 'Ctrl+U' },
+    strike: { tooltip: '刪除線', secondary_tooltip: 'Ctrl+Shift+S' },
+    code: { tooltip: '行內程式碼', secondary_tooltip: '' },
+    colors: { tooltip: '顏色' },
+    link: { tooltip: '連結', secondary_tooltip: 'Ctrl+K' },
+    align_left: { tooltip: '靠左對齊' },
+    align_center: { tooltip: '置中對齊' },
+    align_right: { tooltip: '靠右對齊' },
+    align_justify: { tooltip: '兩端對齊' },
+    nest: { tooltip: '增加縮排', secondary_tooltip: 'Tab' },
+    unnest: { tooltip: '減少縮排', secondary_tooltip: 'Shift+Tab' },
+    block_type: { paragraph: '段落', heading_1: '標題 1', heading_2: '標題 2', heading_3: '標題 3', bullet_list: '無序清單', numbered_list: '有序清單', check_list: '待辦清單', quote: '引用', code_block: '程式碼' },
+  },
+  link_toolbar: {
+    delete: { tooltip: '移除連結' },
+    edit: { tooltip: '編輯連結' },
+    open: { tooltip: '在新分頁開啟' },
+    form: { title_placeholder: '標題', url_placeholder: '輸入網址…', submit: '確認' },
+  },
+  generic: {
+    ctrl_shortcut: 'Ctrl',
+  },
+}
