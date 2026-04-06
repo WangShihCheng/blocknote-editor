@@ -41,7 +41,10 @@
       "Bash(node -e \"const m = require\\(''''./node_modules/@blocknote/core/dist/locales.js''''\\); console.log\\(typeof m\\)\")",
       "Bash(echo 'CJS not available' node --input-type=module -e \"import m from ''''./node_modules/@blocknote/core/dist/locales.js''''; console.log\\(Object.keys\\(m\\)\\)\")",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(where gh:*)",
+      "Read(//c/Program Files/GitHub CLI/**)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth status)"
     ]
   }
 }
