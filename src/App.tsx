@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "./db";
 import type { Doc } from "./types";
 import { ACTIVE_KEY, DEFAULT_CONTENT } from "./utils/constants";
 import { genId, toMarkdown } from "./utils/helpers";
+import { getMathSchema } from "./math-blocks";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { EditorWrapper } from "./components/EditorWrapper";
 import { Sidebar } from "./components/Sidebar";
@@ -94,6 +95,41 @@ export default function App() {
     db.documents.update(id, { title });
   }, []);
 
+  // ── Import Markdown ──────────────────────────────────────────────
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportMd = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const title = file.name.replace(/\.md$/i, "");
+
+      const { BlockNoteEditor } = await import("@blocknote/core");
+      const tempEditor = BlockNoteEditor.create({ schema: getMathSchema() as any });
+      const blocks = await tempEditor.tryParseMarkdownToBlocks(text);
+
+      const id = genId();
+      await db.documents.add({
+        id,
+        title: title || "匯入的文件",
+        content: blocks,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        order: docs.length,
+      });
+
+      setActiveId(id);
+      localStorage.setItem(ACTIVE_KEY, id);
+    } catch (error) {
+      console.error("匯入 Markdown 失敗:", error);
+      alert("匯入失敗，請確認檔案格式是否正確。");
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }, [docs.length]);
+
   // ── Export / Print ──────────────────────────────────────────────
   const exportMd = useCallback(() => {
     const md   = toMarkdown(activeDoc?.content ?? []);
@@ -163,6 +199,20 @@ export default function App() {
               <rect x="6" y="14" width="12" height="8"/>
             </svg>
             列印
+          </button>
+
+          <input
+            type="file" accept=".md" ref={fileInputRef}
+            onChange={handleImportMd} style={{ display: "none" }}
+          />
+          <button onClick={() => fileInputRef.current?.click()} title="匯入 Markdown 檔案"
+            style={{ background: "none", border: `1px solid ${border}`, cursor: "pointer", color: textClr, padding: "5px 12px", borderRadius: "8px", fontSize: "0.82rem", display: "flex", alignItems: "center", gap: "5px" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            匯入
           </button>
 
           <ShimmerButton onClick={exportMd} title="匯出為 Markdown 檔案">⬇ 匯出 .md</ShimmerButton>
