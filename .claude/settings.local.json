@@ -37,7 +37,14 @@
       "Bash(cmd /c \"taskkill /PID 8440 /F && taskkill /PID 8556 /F\" 2)",
       "Bash(1 sleep:*)",
       "Bash(curl -s -o /dev/null -w \"HTTP:%{http_code}\" http://localhost:5173/)",
-      "Bash(node -e \"const p = require\\(''./node_modules/use-sync-external-store/package.json''\\); console.log\\(''type:'', p.type, ''module:'', p.module\\)\")"
+      "Bash(node -e \"const p = require\\(''./node_modules/use-sync-external-store/package.json''\\); console.log\\(''type:'', p.type, ''module:'', p.module\\)\")",
+      "Bash(node -e \"const m = require\\(''''./node_modules/@blocknote/core/dist/locales.js''''\\); console.log\\(typeof m\\)\")",
+      "Bash(echo 'CJS not available' node --input-type=module -e \"import m from ''''./node_modules/@blocknote/core/dist/locales.js''''; console.log\\(Object.keys\\(m\\)\\)\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(where gh:*)",
+      "Read(//c/Program Files/GitHub CLI/**)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth status)"
     ]
   }
 }
