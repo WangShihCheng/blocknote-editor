@@ -44,7 +44,22 @@
       "Bash(git commit:*)",
       "Bash(where gh:*)",
       "Read(//c/Program Files/GitHub CLI/**)",
-      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth status)"
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth status)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" repo create blocknote-editor --public --description \"BlockNote editor with Dexie persistence, math blocks, and zh-TW i18n\")",
+      "Bash(git remote:*)",
+      "Bash(git push:*)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" pr close 1 --comment \"Superseded by a cleaner branch structure.\")",
+      "Bash(git checkout:*)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" pr view 2 --json title,headRefName,commits)",
+      "Bash(node server.js)",
+      "Bash(curl -s http://localhost:3000/auth -o /dev/null -w \"%{http_code}\")",
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\('C:/Users/ken19/blocknote-editor/credentials.json','utf-8'\\)\\); console.log\\(Object.keys\\(d\\)\\)\")",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(cmd /c \"FOR /F \\\\\"tokens=5\\\\\" %a IN \\('netstat -ano ^| findstr :3000'\\) DO taskkill /F /PID %a\")",
+      "Bash(cmd /c \"netstat -ano | findstr :3000\")",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess\")",
+      "Bash(powershell -Command \"Stop-Process -Id 11084 -Force\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/backup/drive)"
     ]
   }
 }
