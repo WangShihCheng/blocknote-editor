@@ -9,7 +9,6 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { EditorWrapper } from "./components/EditorWrapper";
 import { Sidebar } from "./components/Sidebar";
 import { ShortcutModal } from "./components/ShortcutModal";
-import { ShimmerButton } from "./components/ui/ShimmerButton";
 import { NumberTicker } from "./components/ui/NumberTicker";
 
 export default function App() {
@@ -171,55 +170,72 @@ export default function App() {
       {/* Header */}
       <div className="app-header" style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "0 20px", height: "52px", flexShrink: 0,
-        background: headerBg, borderBottom: `1px solid ${border}`,
-        boxShadow: "0 1px 6px rgba(0,0,0,0.07)", zIndex: 100,
+        padding: "0 24px", height: "56px", flexShrink: 0,
+        background: isDark ? "rgba(19,22,42,0.85)" : "rgba(255,255,255,0.85)",
+        backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+        zIndex: 100,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        {/* Left: sidebar toggle + title */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <button onClick={() => setSidebarOpen(o => !o)} title={sidebarOpen ? "收合側邊欄" : "展開側邊欄"}
-            style={{ background: "none", border: "none", cursor: "pointer", color: muted, padding: "5px 6px", borderRadius: "6px", lineHeight: 1, display: "flex", alignItems: "center" }}>
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: muted, padding: "6px", borderRadius: "8px", display: "flex", alignItems: "center", transition: "background 0.15s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = isDark ? "#2a2a40" : "#f1f5f9"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>
+            <svg width="20" height="20" viewBox="0 0 18 18" fill="none">
               <rect x="2" y="4"    width="14" height="1.8" rx="0.9" fill="currentColor"/>
               <rect x="2" y="8.1"  width="14" height="1.8" rx="0.9" fill="currentColor"/>
               <rect x="2" y="12.2" width="14" height="1.8" rx="0.9" fill="currentColor"/>
             </svg>
           </button>
-          <h1 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 600, color: textClr }}>📝 BlockNote Editor</h1>
+          <h1 style={{ margin: 0, fontSize: "1rem", fontWeight: 600, color: textClr, letterSpacing: "0.3px" }}>BlockNote</h1>
         </div>
 
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <span style={{ fontSize: "0.75rem", color: saved ? "#22c55e" : muted, transition: "color 0.3s", minWidth: "50px", textAlign: "right" }}>
-            {saved ? "✓ 已儲存" : "自動儲存"}
+        {/* Right: action buttons */}
+        <div style={{ display: "flex", gap: "2px", alignItems: "center" }}>
+          <span style={{ fontSize: "0.72rem", color: "#22c55e", marginRight: "10px", opacity: saved ? 1 : 0, transition: "opacity 0.3s" }}>
+            ✓ 已儲存
           </span>
 
-          <button onClick={printDoc} title="列印 / 儲存為 PDF（Ctrl+P）"
-            style={{ background: "none", border: `1px solid ${border}`, cursor: "pointer", color: textClr, padding: "5px 12px", borderRadius: "8px", fontSize: "0.82rem", display: "flex", alignItems: "center", gap: "5px" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
-              <rect x="6" y="14" width="12" height="8"/>
+          <input type="file" accept=".md" ref={fileInputRef} onChange={handleImportMd} style={{ display: "none" }} />
+
+          {/* Import */}
+          <button onClick={() => fileInputRef.current?.click()} title="匯入 Markdown"
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: muted, padding: "8px", borderRadius: "8px", display: "flex", alignItems: "center", transition: "background 0.15s, color 0.15s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = isDark ? "#2a2a40" : "#f1f5f9"; e.currentTarget.style.color = textClr; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = muted; }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            列印
           </button>
 
-          <input
-            type="file" accept=".md" ref={fileInputRef}
-            onChange={handleImportMd} style={{ display: "none" }}
-          />
-          <button onClick={() => fileInputRef.current?.click()} title="匯入 Markdown 檔案"
-            style={{ background: "none", border: `1px solid ${border}`, cursor: "pointer", color: textClr, padding: "5px 12px", borderRadius: "8px", fontSize: "0.82rem", display: "flex", alignItems: "center", gap: "5px" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
+          {/* Export */}
+          <button onClick={exportMd} title="匯出 Markdown"
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: muted, padding: "8px", borderRadius: "8px", display: "flex", alignItems: "center", transition: "background 0.15s, color 0.15s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = isDark ? "#2a2a40" : "#f1f5f9"; e.currentTarget.style.color = textClr; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = muted; }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
-            匯入
           </button>
 
-          <ShimmerButton onClick={exportMd} title="匯出為 Markdown 檔案">⬇ 匯出 .md</ShimmerButton>
+          {/* Print */}
+          <button onClick={printDoc} title="列印 / PDF（Ctrl+P）"
+            style={{ background: "transparent", border: "none", cursor: "pointer", color: muted, padding: "8px", borderRadius: "8px", display: "flex", alignItems: "center", transition: "background 0.15s, color 0.15s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = isDark ? "#2a2a40" : "#f1f5f9"; e.currentTarget.style.color = textClr; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = muted; }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+            </svg>
+          </button>
 
-          <button onClick={() => setIsDark(d => !d)}
-            style={{ padding: "5px 14px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.82rem", background: isDark ? "#e0e0e0" : "#1e1e2e", color: isDark ? "#1e1e2e" : "#e0e0e0" }}>
-            {isDark ? "☀️ 淺色" : "🌙 深色"}
+          {/* Divider */}
+          <div style={{ width: "1px", height: "20px", background: border, margin: "0 6px" }} />
+
+          {/* Dark mode */}
+          <button onClick={() => setIsDark(d => !d)} title={isDark ? "切換淺色模式" : "切換深色模式"}
+            style={{ background: isDark ? "#2a2a40" : "#f1f5f9", border: "none", cursor: "pointer", color: textClr, padding: "7px 10px", borderRadius: "8px", fontSize: "15px", display: "flex", alignItems: "center", transition: "background 0.15s" }}>
+            {isDark ? "☀️" : "🌙"}
           </button>
         </div>
       </div>
