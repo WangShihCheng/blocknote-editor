@@ -199,23 +199,23 @@ export default function App() {
 
           <input type="file" accept=".md" ref={fileInputRef} onChange={handleImportMd} style={{ display: "none" }} />
 
-          {/* Import */}
+          {/* Import — 向上箭頭（上傳概念） */}
           <button onClick={() => fileInputRef.current?.click()} title="匯入 Markdown"
             style={{ background: "transparent", border: "none", cursor: "pointer", color: muted, padding: "8px", borderRadius: "8px", display: "flex", alignItems: "center", transition: "background 0.15s, color 0.15s" }}
             onMouseEnter={e => { e.currentTarget.style.background = isDark ? "#2a2a40" : "#f1f5f9"; e.currentTarget.style.color = textClr; }}
             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = muted; }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
           </button>
 
-          {/* Export */}
+          {/* Export — 向下箭頭（下載概念） */}
           <button onClick={exportMd} title="匯出 Markdown"
             style={{ background: "transparent", border: "none", cursor: "pointer", color: muted, padding: "8px", borderRadius: "8px", display: "flex", alignItems: "center", transition: "background 0.15s, color 0.15s" }}
             onMouseEnter={e => { e.currentTarget.style.background = isDark ? "#2a2a40" : "#f1f5f9"; e.currentTarget.style.color = textClr; }}
             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = muted; }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
           </button>
 
