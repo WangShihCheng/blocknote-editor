@@ -9,15 +9,17 @@ import { zhTW } from "../i18n/zh-TW";
 import { filterSuggestionItems, countChars, uploadFile } from "../utils/helpers";
 
 export const EditorWrapper = memo(function EditorWrapper({
-  initialContent, isDark, onContentChange, onCharCount,
+  initialContent, isDark, onContentChange, onCharCount, onEditorReady,
 }: {
   initialContent: any[];
   isDark: boolean;
   onContentChange: (c: any[]) => void;
   onCharCount: (n: number) => void;
+  onEditorReady?: (editor: any) => void;
 }) {
   const editor = useCreateBlockNote({ schema: getMathSchema(), initialContent, uploadFile, dictionary: zhTW } as any);
   useEffect(() => {
+    onEditorReady?.(editor);
     onCharCount(countChars(editor.document as any));
     return editor.onChange(() => {
       onContentChange(editor.document as any);

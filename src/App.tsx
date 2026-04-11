@@ -25,6 +25,9 @@ export default function App() {
   const [search,        setSearch]        = useState("");
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [isBackingUp,   setIsBackingUp]   = useState(false);
+  const [importing,     setImporting]     = useState(false);
+  const editorRef  = useRef<any>(null);
+  const docxInputRef = useRef<HTMLInputElement>(null);
 
   const activeDoc = docs.find(d => d.id === activeId) ?? docs[0];
 
@@ -94,6 +97,37 @@ export default function App() {
   const renameDoc = useCallback((id: string, title: string) => {
     db.documents.update(id, { title });
   }, []);
+
+  // ── Import .docx ────────────────────────────────────────────────
+  const handleImportDocx = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editorRef.current) return;
+    setImporting(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("http://localhost:3001/api/convert", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      const blocks = await editorRef.current.tryParseMarkdownToBlocks(data.markdown);
+      const id = genId();
+      await db.documents.add({
+        id,
+        title: file.name.replace(/\.[^.]+$/, ""),
+        content: blocks,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        order: docs.length,
+      });
+      setActiveId(id);
+      localStorage.setItem(ACTIVE_KEY, id);
+    } catch (err: any) {
+      alert(`匯入失敗：${err.message}`);
+    } finally {
+      setImporting(false);
+      if (docxInputRef.current) docxInputRef.current.value = "";
+    }
+  }, [docs.length]);
 
   // ── Import Markdown ──────────────────────────────────────────────
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -218,6 +252,17 @@ export default function App() {
 
           <input type="file" accept=".md" ref={fileInputRef} onChange={handleImportMd} style={{ display: "none" }} />
 
+          {/* Import .docx */}
+          <input type="file" accept=".docx" ref={docxInputRef} onChange={handleImportDocx} style={{ display: "none" }} />
+          <button onClick={() => docxInputRef.current?.click()} disabled={importing} title="匯入 Word 文件（.docx）"
+            style={{ background: "transparent", border: "none", cursor: importing ? "wait" : "pointer", color: muted, padding: "8px", borderRadius: "8px", display: "flex", alignItems: "center", transition: "background 0.15s, color 0.15s", opacity: importing ? 0.6 : 1 }}
+            onMouseEnter={e => { if (!importing) { e.currentTarget.style.background = isDark ? "#2a2a40" : "#f1f5f9"; e.currentTarget.style.color = textClr; }}}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = muted; }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+          </button>
+
           {/* Import — 向上箭頭（上傳概念） */}
           <button onClick={() => fileInputRef.current?.click()} title="匯入 Markdown"
             style={{ background: "transparent", border: "none", cursor: "pointer", color: muted, padding: "8px", borderRadius: "8px", display: "flex", alignItems: "center", transition: "background 0.15s, color 0.15s" }}
@@ -291,7 +336,8 @@ export default function App() {
             {activeDoc && (
               <ErrorBoundary>
                 <EditorWrapper key={activeId} initialContent={activeDoc.content}
-                  isDark={isDark} onContentChange={handleContentChange} onCharCount={setWordCount} />
+                  isDark={isDark} onContentChange={handleContentChange} onCharCount={setWordCount}
+                  onEditorReady={(ed) => { editorRef.current = ed; }} />
               </ErrorBoundary>
             )}
           </div>
