@@ -24,6 +24,7 @@ export default function App() {
   const [wordCount,     setWordCount]     = useState(0);
   const [search,        setSearch]        = useState("");
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [isBackingUp,   setIsBackingUp]   = useState(false);
 
   const activeDoc = docs.find(d => d.id === activeId) ?? docs[0];
 
@@ -142,6 +143,24 @@ export default function App() {
 
   const printDoc = useCallback(() => { window.print(); }, []);
 
+  // ── Google Drive Backup ─────────────────────────────────────────
+  const handleGoogleDriveBackup = useCallback(async () => {
+    setIsBackingUp(true);
+    try {
+      const res = await fetch('http://localhost:3000/api/backup/drive', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert(`✅ 備份成功！\n${data.message}`);
+      } else {
+        alert(`❌ 備份失敗：${data.error}\n請確認是否有先啟動後端並完成授權。`);
+      }
+    } catch {
+      alert('連線失敗！請確認 Node.js 後端伺服器（port 3000）是否執行中。');
+    } finally {
+      setIsBackingUp(false);
+    }
+  }, []);
+
   // ── Keyboard shortcut: Ctrl+P → print, ? → shortcuts ──────────
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -226,6 +245,27 @@ export default function App() {
             onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = muted; }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+            </svg>
+          </button>
+
+          {/* Google Drive Backup */}
+          <button
+            onClick={handleGoogleDriveBackup}
+            disabled={isBackingUp}
+            title="備份至 Google Drive"
+            style={{
+              background: "transparent", border: "none", cursor: isBackingUp ? "wait" : "pointer",
+              color: isBackingUp ? "#22c55e" : muted, padding: "8px", borderRadius: "8px",
+              display: "flex", alignItems: "center", transition: "background 0.15s, color 0.15s",
+              opacity: isBackingUp ? 0.7 : 1,
+            }}
+            onMouseEnter={e => { if (!isBackingUp) { e.currentTarget.style.background = isDark ? "#2a2a40" : "#f1f5f9"; e.currentTarget.style.color = textClr; }}}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = isBackingUp ? "#22c55e" : muted; }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {isBackingUp
+                ? <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+                : <><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></>
+              }
             </svg>
           </button>
 
