@@ -137,12 +137,47 @@ export default function App() {
     if (!file) return;
 
     try {
-      const text = await file.text();
+      let raw = await file.text();
       const title = file.name.replace(/\.md$/i, "");
 
+      // 【預處理 1】移除 YAML Frontmatter（只刪開頭的 ---...---）
+      raw = raw.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, "");
+
+      // 【預處理 2】Obsidian 雙向連結 [[頁面]] → 純文字，[[頁面|別名]] → 別名
+      raw = raw.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, "$2");
+      raw = raw.replace(/\[\[([^\]]+)\]\]/g, "$1");
+
+      // 【預處理 3】保護 $$...$$ 數學式，換成安全代幣
+      const mathVault: string[] = [];
+      raw = raw.replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
+        mathVault.push(match);
+        return `\n\n[MATH_TOKEN_${mathVault.length - 1}]\n\n`;
+      });
+
+      // 解析 Markdown → BlockNote Blocks
       const { BlockNoteEditor } = await import("@blocknote/core");
       const tempEditor = BlockNoteEditor.create({ schema: getMathSchema() as any });
-      const blocks = await tempEditor.tryParseMarkdownToBlocks(text);
+      const blocks = await tempEditor.tryParseMarkdownToBlocks(raw);
+
+      // 【後處理】遞迴將代幣還原成原始數學式
+      if (mathVault.length > 0) {
+        const restoreMath = (arr: any[]) => {
+          arr.forEach(block => {
+            if (Array.isArray(block.content)) {
+              block.content.forEach((inline: any) => {
+                if (inline.type === "text" && inline.text) {
+                  inline.text = inline.text.replace(
+                    /\[MATH_TOKEN_(\d+)\]/g,
+                    (_: string, i: string) => mathVault[parseInt(i)] ?? ""
+                  );
+                }
+              });
+            }
+            if (block.children?.length) restoreMath(block.children);
+          });
+        };
+        restoreMath(blocks);
+      }
 
       const id = genId();
       await db.documents.add({
