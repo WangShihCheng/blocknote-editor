@@ -147,43 +147,57 @@ export default function App() {
       raw = raw.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, "$2");
       raw = raw.replace(/\[\[([^\]]+)\]\]/g, "$1");
 
-      // 【預處理 3】保護 $$...$$ 數學式，換成安全代幣
+      // 【預處理 3】保護 $$...$$ 數學式，換成安全代幣（只存 LaTeX 內容，不含 $$）
       const mathVault: string[] = [];
-      raw = raw.replace(/\$\$([\s\S]*?)\$\$/g, (match) => {
-        mathVault.push(match);
+      raw = raw.replace(/\$\$([\s\S]*?)\$\$/g, (_match, inner: string) => {
+        mathVault.push(inner.trim());
         return `\n\n[MATH_TOKEN_${mathVault.length - 1}]\n\n`;
       });
 
       // 解析 Markdown → BlockNote Blocks
       const { BlockNoteEditor } = await import("@blocknote/core");
       const tempEditor = BlockNoteEditor.create({ schema: getMathSchema() as any });
-      const blocks = await tempEditor.tryParseMarkdownToBlocks(raw);
+      const parsedBlocks = await tempEditor.tryParseMarkdownToBlocks(raw);
 
-      // 【後處理】遞迴將代幣還原成原始數學式
-      if (mathVault.length > 0) {
-        const restoreMath = (arr: any[]) => {
-          arr.forEach(block => {
-            if (Array.isArray(block.content)) {
-              block.content.forEach((inline: any) => {
-                if (inline.type === "text" && inline.text) {
-                  inline.text = inline.text.replace(
-                    /\[MATH_TOKEN_(\d+)\]/g,
-                    (_: string, i: string) => mathVault[parseInt(i)] ?? ""
-                  );
-                }
-              });
-            }
-            if (block.children?.length) restoreMath(block.children);
+      // 【後處理】把「整段都是代幣」的段落換成 mathDisplay block；
+      //           段落中夾雜代幣則還原成 $$...$$ 文字
+      const tokenOnly = /^\[MATH_TOKEN_(\d+)\]$/;
+      const finalBlocks: any[] = [];
+
+      for (const block of parsedBlocks) {
+        const text = (Array.isArray(block.content)
+          ? block.content.map((c: any) => c.text ?? "").join("")
+          : ""
+        ).trim();
+
+        const m = text.match(tokenOnly);
+        if (m) {
+          // 整段 = 一個數學式 → 轉成 mathDisplay block
+          finalBlocks.push({
+            type: "mathDisplay",
+            props: { formula: mathVault[parseInt(m[1])] ?? "", numbered: false },
           });
-        };
-        restoreMath(blocks);
+        } else {
+          // 段落中夾雜代幣（少見）→ 還原成 $$ 文字
+          if (Array.isArray(block.content)) {
+            block.content.forEach((inline: any) => {
+              if (inline.type === "text" && inline.text) {
+                inline.text = inline.text.replace(
+                  /\[MATH_TOKEN_(\d+)\]/g,
+                  (_: string, i: string) => `$$${mathVault[parseInt(i)] ?? ""}$$`
+                );
+              }
+            });
+          }
+          finalBlocks.push(block);
+        }
       }
 
       const id = genId();
       await db.documents.add({
         id,
         title: title || "匯入的文件",
-        content: blocks,
+        content: finalBlocks,
         createdAt: new Date(),
         updatedAt: new Date(),
         order: docs.length,
